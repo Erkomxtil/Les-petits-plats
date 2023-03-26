@@ -1,6 +1,7 @@
 import { displayRecipe } from "./recipeFactory.js";
 import { getRecipesDatas } from "./datas.js";
 import { closeTagsSearch, openTagsSearch } from "./tags.js"
+import { searchTags } from "./search.js"
 
 /**
  * 
@@ -15,7 +16,7 @@ async function getIngredientList() {
       listIngredients.push(ingredientList.ingredient)
     })
   })
-  
+
   /**
    * On enlève les doubles dans la liste des ingrédients
    */
@@ -26,8 +27,9 @@ async function getIngredientList() {
     return acc
   }, []);
   
-  let orderedListIngredient = listIngredientsWithoutDouble.sort() 
+  let orderedListIngredient = listIngredientsWithoutDouble.sort(function (a,b) {return a.localeCompare(b)}) 
   const forDeletion = ["Beurre fondu", "Beurre salé", "Chocolat au lait","Chocolat noir","Chocolat noir en pépites", "Citron Vert", "Farine de blé noir", "Oeuf dur", "Viande hachée 1% de matière grasse"]
+  
   let finalList = orderedListIngredient.filter(item => !forDeletion.includes(item))
   return finalList 
 }
@@ -49,7 +51,7 @@ async function getDescriptionsOrTitle(info) {
 
 /**
  * 
- * @param {*} info On choisit si on veut les titres ou la descrition "title" ou "description"
+ * @param {*} info On choisit si on veut les appareils ou ustensiles "appliance" ou "ustensils"
  * @returns On récupère les titres ou les descriptions
  */
 async function getApplianceOrUstensils(info) {
@@ -65,20 +67,15 @@ async function getApplianceOrUstensils(info) {
     }
   })
 
-  
   let listInfoWithoutDouble = datas.reduce(function (acc, valCourante) {
     if(acc.indexOf(valCourante) === -1) {
       acc.push(valCourante);
     }
     return acc
   }, []);
-  
-  return listInfoWithoutDouble
+
+  return listInfoWithoutDouble.sort((a,b) => a.localeCompare(b))
 }
-
-
-
-
 
 /**
  * Affichage de la liste des tags ingrédients, appareils et ustensiles
@@ -88,16 +85,17 @@ async function selectListIngredients(datas, listParagraphe) {
   const list = document.querySelector(listParagraphe)
 
   try {
+    list.innerHTML = ""
     listInfos.map((info) => list.innerHTML += `<a href="#" class="tag">${info}</a><br>`)
   } catch (error) {
     console.log(error.message)
   }
 }
 
-
-
 /* Affichage des recettes */
-displayRecipe()
+displayRecipe(getRecipesDatas())
+
+
 
 /**
  * Initialisation des fonctions
@@ -106,6 +104,7 @@ function init() {
   selectListIngredients( getIngredientList(), ".list-ingredients")
   selectListIngredients( getApplianceOrUstensils("ustensils"), ".list-ustensils")
   selectListIngredients( getApplianceOrUstensils("appliance"), ".list-appliance")
+  searchTags(getIngredientList())
   
   openTagsSearch()
   closeTagsSearch()
@@ -113,4 +112,4 @@ function init() {
 
 init()
 
-export { getIngredientList, getDescriptionsOrTitle }
+export { getIngredientList, getDescriptionsOrTitle, selectListIngredients, getApplianceOrUstensils }

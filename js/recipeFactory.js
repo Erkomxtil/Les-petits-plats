@@ -1,10 +1,12 @@
-import { getRecipesDatas } from "./datas.js"
-
-async function displayRecipe() {
-  const recipes = await getRecipesDatas()
-  const main = document.querySelector(".recipes-wrapper")
-
+/**
+ * 
+ * @param {*} datas On récupère les données sur les recttes pour les afficher
+ */
+async function displayRecipe(datas) {
+  const recipes = await datas
+  
   try {
+    const main = document.querySelector(".recipes-wrapper")
     recipes.forEach(recipe => {
       const article = document.createElement("article")
       const {id, name, servings, ingredients, time, description, appliance, ustensils} = recipe
@@ -53,27 +55,7 @@ async function displayRecipe() {
       article.appendChild(img)
       article.appendChild(wrapper)
       article.appendChild(ingredientsRecipe)
-
-      // article.innerHTML= `
-      //   <img src="images/image-basic-plat.jpg" alt="Image par défault">
-      //   <div class="info-recipe-wrapper">
-      //     <div class="info-title-time">
-      //       <h2>${name}</h2><div class="info-time"><strong><i class="fa-regular fa-clock"></i> ${time} min</strong></div>
-      //     </div>
-      //     <div class="info-ingredients-recipe">
-      //       <div class="info-ingredients">
-      //         <p class="ingredients">
-
-      //         </p>
-      //       </div>
-      //       <div class="info-recipe">
-      //         <p>
-      //           ${description}
-      //         </p>
-      //       </div>
-      //     </div>
-      //   </div class="info-recipe-wrapper">`
-        main.appendChild(article)
+      main.appendChild(article)
     }) 
   } catch (error) {
     console.log(error.message)
