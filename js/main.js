@@ -67,6 +67,15 @@ async function getApplianceOrUstensils(info) {
     }
   })
 
+  return orderedListWithoutDouble(datas)
+}
+
+/**
+ * 
+ * @param {*} datas tableau à trier
+ * @returns il retourne un tableau trié sans doublons
+ */
+function orderedListWithoutDouble(datas){
   let listInfoWithoutDouble = datas.reduce(function (acc, valCourante) {
     if(acc.indexOf(valCourante) === -1) {
       acc.push(valCourante);
@@ -79,14 +88,19 @@ async function getApplianceOrUstensils(info) {
 
 /**
  * Affichage de la liste des tags ingrédients, appareils et ustensiles
+ * @param {*} datas tableau de données
+ * @param {*} listParagraphe On choisit la div d'affichage de la liste
  */
-async function selectListIngredients(datas, listParagraphe) {
+async function selectListSearchTags(datas, listParagraphe) {
   const listInfos = await datas
   const list = document.querySelector(listParagraphe)
 
   try {
     list.innerHTML = ""
-    listInfos.map((info) => list.innerHTML += `<a href="#" class="tag">${info}</a><br>`)
+    listInfos.map((info) => {
+      const infoCapitalized =  info.charAt(0).toUpperCase() + info.slice(1)
+      list.innerHTML += `<a href="#" id="${info.toLowerCase()}" class="tag" onload="displayTagsSelected();">${infoCapitalized}</a>`
+    })
   } catch (error) {
     console.log(error.message)
   }
@@ -95,21 +109,21 @@ async function selectListIngredients(datas, listParagraphe) {
 /* Affichage des recettes */
 displayRecipe(getRecipesDatas())
 
-
-
 /**
  * Initialisation des fonctions
  */
 function init() {
-  selectListIngredients( getIngredientList(), ".list-ingredients")
-  selectListIngredients( getApplianceOrUstensils("ustensils"), ".list-ustensils")
-  selectListIngredients( getApplianceOrUstensils("appliance"), ".list-appliance")
+  selectListSearchTags( getIngredientList(), ".list-ingredients")
+  selectListSearchTags( getApplianceOrUstensils("ustensils"), ".list-ustensils")
+  selectListSearchTags( getApplianceOrUstensils("appliance"), ".list-appliances")
   searchTags(getIngredientList())
   
   openTagsSearch()
   closeTagsSearch()
 }
 
+
+
 init()
 
-export { getIngredientList, getDescriptionsOrTitle, selectListIngredients, getApplianceOrUstensils }
+export { getIngredientList, getDescriptionsOrTitle, selectListSearchTags, getApplianceOrUstensils, orderedListWithoutDouble }

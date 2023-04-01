@@ -54,6 +54,9 @@ header img {
   gap: 20px;
   position: absolute;
 }
+.tags-search .list-infos a {
+  display: block;
+}
 .tags-search button {
   height: 69px;
   width: 170px;
@@ -190,4 +193,9 @@ main article .info-recipe p {
   display: -webkit-box;
   -webkit-line-clamp: 6;
   -webkit-box-orient: vertical;
+}
+main .no-recipes {
+  font-family: "lato", sans-serif;
+  font-size: 20px;
+  color: #FF8080;
 }/*# sourceMappingURL=style.css.map */

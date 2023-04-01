@@ -2,14 +2,14 @@
  * 
  * @param {*} datas On récupère les données sur les recttes pour les afficher
  */
-async function displayRecipe(datas) {
+async function displayRecipe(datas) { 
   const recipes = await datas
   
   try {
     const main = document.querySelector(".recipes-wrapper")
     recipes.forEach(recipe => {
       const article = document.createElement("article")
-      const {id, name, servings, ingredients, time, description, appliance, ustensils} = recipe
+      const { id, name, servings, ingredients, time, description, appliance, ustensils } = recipe
 
       article.dataset.id = id
 
