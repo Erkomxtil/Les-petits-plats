@@ -301,14 +301,16 @@ var tagsSearchArray = []
 function displayTagsSelected() {
   document.addEventListener("click", (e)=> {
     if(e.target.classList.contains("tag")){
+      console.log()
       const tagWrapper = document.querySelector(".tags-selected")
       const tagText = e.target.textContent      
-      const tagsSearch = document.querySelector(".tags-search")      
+      const tagsSearch = document.querySelector(".tags-search")
+      const colorTag = e.target.parentNode.getAttribute("id")      
       
       tagsSearchArray.push(tagText) 
       tagsSearch.dataset.tags = [tagsSearchArray]
       e.target.style.display = "none"
-      tagWrapper.innerHTML+=`<button class="btn-tag" onload="removeBtnTag();" data-selected="true">${tagText}<i class="far fa-times-circle"></i></button>`
+      tagWrapper.innerHTML+=`<button class="btn-tag" onload="removeBtnTag();" data-selected="true" data-color="${colorTag}">${tagText}<i class="far fa-times-circle"></i></button>`
     }
   })
 }

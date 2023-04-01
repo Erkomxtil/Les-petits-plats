@@ -48,6 +48,35 @@ header img {
   font-size: 32px;
 }
 
+.tags-selected {
+  margin-top: 20px;
+}
+.tags-selected .btn-tag {
+  padding: 10px 30px 10px 20px;
+  border: none;
+  border-radius: 5px;
+  position: relative;
+  margin-right: 10px;
+}
+.tags-selected .btn-tag i {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 8px;
+}
+.tags-selected .btn-tag[data-color=ingredients] {
+  color: #ffffff;
+  background-color: #3282F7;
+}
+.tags-selected .btn-tag[data-color=appliances] {
+  color: #ffffff;
+  background-color: #ED6454;
+}
+.tags-selected .btn-tag[data-color=ustensils] {
+  color: #ffffff;
+  background-color: #68D9A4;
+}
+
 .tags-search {
   display: flex;
   padding: 20px 0 82px 0;

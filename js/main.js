@@ -99,7 +99,7 @@ async function selectListSearchTags(datas, listParagraphe) {
     list.innerHTML = ""
     listInfos.map((info) => {
       const infoCapitalized =  info.charAt(0).toUpperCase() + info.slice(1)
-      list.innerHTML += `<a href="#" id="${info.toLowerCase()}" class="tag" onload="displayTagsSelected();">${infoCapitalized}</a>`
+      list.innerHTML += `<a href="#" id="${info.split(" ").join("").toLowerCase()}" class="tag" onload="displayTagsSelected();">${infoCapitalized}</a>`
     })
   } catch (error) {
     console.log(error.message)
