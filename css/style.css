@@ -57,12 +57,14 @@ header img {
   border-radius: 5px;
   position: relative;
   margin-right: 10px;
+  margin-bottom: 10px;
 }
 .tags-selected .btn-tag i {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   right: 8px;
+  cursor: pointer;
 }
 .tags-selected .btn-tag[data-color=ingredients] {
   color: #ffffff;
@@ -70,11 +72,11 @@ header img {
 }
 .tags-selected .btn-tag[data-color=appliances] {
   color: #ffffff;
-  background-color: #ED6454;
+  background-color: #68D9A4;
 }
 .tags-selected .btn-tag[data-color=ustensils] {
   color: #ffffff;
-  background-color: #68D9A4;
+  background-color: #ED6454;
 }
 
 .tags-search {
@@ -98,6 +100,7 @@ header img {
   border: none;
   font-family: "lato", sans-serif;
   font-size: 18px;
+  cursor: pointer;
 }
 .tags-search button.no-active {
   display: none;

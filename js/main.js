@@ -1,7 +1,7 @@
 import { displayRecipe } from "./recipeFactory.js";
 import { getRecipesDatas } from "./datas.js";
 import { closeTagsSearch, openTagsSearch } from "./tags.js"
-import { searchTags } from "./search.js"
+import { searchTags, displayTagsSelected } from "./search.js"
 
 /**
  * 
@@ -83,7 +83,7 @@ function orderedListWithoutDouble(datas){
     return acc
   }, []);
 
-  return listInfoWithoutDouble.sort((a,b) => a.localeCompare(b))
+  return listInfoWithoutDouble.sort((a,b) => typeof(a)!== "number" ? a.localeCompare(b): "")
 }
 
 /**
@@ -117,7 +117,6 @@ function init() {
   selectListSearchTags( getApplianceOrUstensils("ustensils"), ".list-ustensils")
   selectListSearchTags( getApplianceOrUstensils("appliance"), ".list-appliances")
   searchTags(getIngredientList())
-  
   openTagsSearch()
   closeTagsSearch()
 }

@@ -12,7 +12,7 @@ function openTagsSearch () {
       const btn = document.querySelectorAll(".input-list")
       btn.forEach((nope) => nope.style.display = "none")
       e.target.classList.add("no-active")
-      e.target ? e.target.nextElementSibling.style.display = "block": ""       
+      e.target.nextElementSibling ? e.target.nextElementSibling.style.display = "block": ""       
     })
   })
 

@@ -2,25 +2,44 @@ import { getIngredientList, selectListSearchTags, getApplianceOrUstensils, order
 import { getRecipesDatas } from "./datas.js"
 import { displayRecipe } from "./recipeFactory.js"
 
+
+/**
+ * Variable global tableau des tags selectionnés pour l'ajout et le retrait des tags
+ */
+var tagsSearchArray = []
+
 async function mainSearch(datas) {
   const recipesDatas = await datas
   const search = document.getElementById("search")  
   let titles = await getDatasFromMainRecipes(recipesDatas, "name")
   let ingredients = await getDatasFromMainRecipes(recipesDatas, "ingredients")
   let descriptions = await getDatasFromMainRecipes(recipesDatas, "description")
-  let appliances = await getDatasFromMainRecipes(recipesDatas, "appliance")
-  let ustensils = await getDatasFromMainRecipes(recipesDatas, "ustensils")
   
   search.addEventListener("input", (e) => {
     e.preventDefault()
     const query = e.target.value
+    let allRecipes    
+    let filteredDatas = []
+    
     if(e.target.value.length >= 3) {
+      let ingredientsArray = [], appliancesArray = [], ustensilsArray = []      
+      allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query)
+      filteredDatas = recipesDatas.filter( recipe => allRecipes.includes(recipe.id))
       
-      let displayRecipeArray = [], ingredientsArray = [], appliancesArray = [], ustensilsArray = []      
-      recipesDatas.forEach(data => {
-        const allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query)
-        getNewObjetFromTheSelection(allRecipes, data, displayRecipeArray, ingredientsArray, appliancesArray, ustensilsArray)
-      })
+      for (let data of filteredDatas) {
+        for (let ingredient of data.ingredients) {
+          ingredientsArray.push(ingredient.ingredient)
+        }
+      }
+      for (let data of filteredDatas) {
+        appliancesArray.push(data.appliance)
+      }
+
+      for (let data of filteredDatas) {
+        for (let ustensil of data.ustensils) {
+          ustensilsArray.push(ustensil)
+        }
+      }
 
       /* Mise à jour des tags avec la recherche principale */
       displayNewListSearchTags(ingredientsArray, ".list-ingredients", "newList")
@@ -31,25 +50,135 @@ async function mainSearch(datas) {
       searchTags(ingredientsArray, "input-ingredient", ".list-ingredients")
       searchTags(appliancesArray, "input-appliance", ".list-appliances")
       searchTags(ustensilsArray, "input-ustensils", ".list-ustensils")
-
+      
       /* Affichage quand aucune recette ne correspond à la recherche */
-      if(displayRecipeArray.length === 0) {
+      if(filteredDatas.length === 0) {
         noRecipesFoundDisplay()
-      }else {
-        displayRecipeAfterSelection(displayRecipeArray)      
+      } else {
+        /* Affichage des recettes avec la contrainte des tags */          
+        displayRecipesWithTagsSelected(filteredDatas)
       }
     } else {
-      displayRecipeAfterSelection(recipesDatas)
+      displayRecipesWithTagsSelected(getRecipesDatas())
     }
   })
 }
 
+async function displayRecipesWithTagsSelected(allDatasFromMainSearch) {
+  
+  const recipeDatas = await allDatasFromMainSearch
+  const targetNode = document.querySelector(".tags-selected")
+  const inputSearch = document.getElementById("search")  
+  const config = { childList: true }  
+  const addedRemovedTag = document.querySelector(".tags-selected").dataset
+  const main = document.querySelector(".recipes-wrapper")
+  
+  displayRecipeAfterSelection(recipeDatas)
+
+  let callback = (mutationList) => {
+    // console.log(mutationList)
+
+    if (mutationList[0].type === "childList") {
+      // console.log("ok")
+      observer.disconnect()
+      main.innerHTML = ""
+      displayRecipeAfterSelection(tagsSelectedDisplay(recipeDatas))      
+      observer.observe(targetNode, config)
+    }
+    
+    if(mutationList[0].target.childNodes.length === 0) {
+      displayRecipeAfterSelection(recipeDatas)
+    }
+  }
+  
+  const observer = new MutationObserver(callback)  
+  observer.observe(targetNode, config) 
+}
+
+async function tagsSelectedDisplay(allRecipesDatas) {
+  let recipeDatas
+  if (typeof allRecipesDatas?.then === 'function') {
+    recipeDatas = await allRecipesDatas
+  } else {
+    recipeDatas = allRecipesDatas
+  }
+
+  let tagFilter = false 
+  let recipeFilteredWithTag = []
+  let allIngredientsTag = []
+  let allAppliancesTag = []
+  let allUstensilsTag = []
+  const tagsSelectedList = document.querySelectorAll(".btn-tag")
+
+
+
+      
+  for (let tag of tagsSelectedList){
+    if (tag.dataset.color === "ingredients") {      
+      allIngredientsTag.push(tag.textContent.toLowerCase())
+    }
+  }
+  for (let tag of tagsSelectedList){  
+    if (tag.dataset.color === "appliances") {      
+      allAppliancesTag.push(tag.textContent.toLowerCase())
+    }
+  }
+  for (let tag of tagsSelectedList){  
+    if (tag.dataset.color === "ustensils") {
+      allUstensilsTag.push(tag.textContent.toLowerCase())
+    }
+  }
+    
+  if(allIngredientsTag.length > 0) {
+    if(tagFilter) {
+      recipeFilteredWithTag = recipeFilteredWithTag.filter(recipe => recipe.ingredients.some( ingredient => allIngredientsTag.includes(ingredient.ingredient.toLowerCase())))
+    } else {
+      recipeFilteredWithTag = recipeDatas.filter(recipe => recipe.ingredients.some( ingredient => allIngredientsTag.includes(ingredient.ingredient.toLowerCase())))
+      tagFilter = true
+    }
+  }
+  
+  if(allAppliancesTag.length > 0) {
+    if(tagFilter) {              
+      recipeFilteredWithTag = recipeFilteredWithTag.filter(recipe => allAppliancesTag.includes(recipe.appliance.toLowerCase()))
+    } else {
+      recipeFilteredWithTag = recipeDatas.filter(recipe => allAppliancesTag.includes(recipe.appliance.toLowerCase()))
+      tagFilter = true
+    }
+  }
+  
+  if(allUstensilsTag.length > 0) {
+    if(tagFilter) {
+      recipeFilteredWithTag = recipeFilteredWithTag.filter(recipe => recipe.ustensils.some( ustensil => allUstensilsTag.includes(ustensil.toLowerCase())))
+    } else {
+      recipeFilteredWithTag = recipeDatas.filter(recipe => recipe.ustensils.some( ustensil => allUstensilsTag.includes(ustensil.toLowerCase())))
+      tagFilter = true
+    }
+  }
+
+  if(allUstensilsTag.length === 0 && allAppliancesTag.length === 0 && allIngredientsTag.length === 0) {
+    recipeFilteredWithTag = recipeDatas
+  }
+
+   console.log(recipeFilteredWithTag)
+  return recipeFilteredWithTag 
+}
+
+/**
+ * Affichage quand aucune recette ne correspond
+ */
 function noRecipesFoundDisplay() {
   const main = document.querySelector(".recipes-wrapper")
   main.innerHTML = `<p class="no-recipes">Aucune recette ne correspond à votre critère… vous pouvez
   chercher « tarte aux pommes », « poisson », etc</p>`
 }
 
+/**
+ * 
+ * @param {*} listInfos Données concernant la liste des ingrédients, appareils ou ustensiles
+ * @param {*} listParagraphe 
+ * @param {*} fullList 
+ */
 function displayNewListSearchTags(listInfos, listParagraphe, fullList) { 
   const list = document.querySelector(listParagraphe)
   list.innerHTML = ""
@@ -89,15 +218,22 @@ function displayNewListSearchTags(listInfos, listParagraphe, fullList) {
   listInfoWithoutDouble.sort((a,b) => a.localeCompare(b)) 
 
   listInfoWithoutDouble.map( info => {
-    list.innerHTML += `<a href="#" id="${info.toLowerCase()}" class="tag" onclick="displayTagsSelected();">${info}</a>`
+    list.innerHTML += `<a href="#" id="${info.toLowerCase()}" class="tag" onload="displayTagsSelected();">${info}</a>`
   })
+
 }
 
 /**
  * Affichage des recettes
  * @param {*} recipesDatas tableau des recettes selectionnées
  */
-function displayRecipeAfterSelection(recipesDatas){
+async function displayRecipeAfterSelection(recipesDatas){
+  let dataDisplay
+  if (typeof recipesDatas?.then === 'function') {
+    dataDisplay = await recipesDatas
+  } else {
+    dataDisplay = recipesDatas
+  }
   const main = document.querySelector(".recipes-wrapper")
   main.innerHTML = ""
   displayRecipe(recipesDatas)
@@ -132,6 +268,13 @@ function getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query
     }
   })
 
+
+
+  // console.log(titles, "titre")
+  // console.log(ingredients, "ingrédients")
+  // console.log(descriptions, "descriptions")
+
+
   return allRecipes
 }
 
@@ -152,6 +295,8 @@ function getNewObjetFromTheSelection(allRecipes, data, displayRecipeArray, ingre
       "ingredients": data.ingredients,
       "time": data.time,
       "description": data.description,
+      "appliance": data.appliance,
+      "ustensils": data.ustensils
     }
     displayRecipeArray.push(recipe)
     data.ingredients.map(ingredient => ingredientsArray.push(ingredient.ingredient))
@@ -293,29 +438,78 @@ function HideTags(datas, listTag, query) {
 }
 
 /**
- * Variable global tableau des tags selectionnés pour l'ajout et le retrait des tags
+ * Affichage des tags selectionnés
  */
-var tagsSearchArray = []
+async function displayTagsSelected() {
+  const recipesDatas = await getRecipesDatas()
+  const datasFilteredWithTags = await tagsSelectedDisplay(getRecipesDatas()) 
+  let titles = await getDatasFromMainRecipes(recipesDatas, "name")
+  let ingredients = await getDatasFromMainRecipes(recipesDatas, "ingredients")
+  let descriptions = await getDatasFromMainRecipes(recipesDatas, "description")
+  const search = document.getElementById("search")
+  const tagsSearchDataset = document.querySelector(".tags-search")
 
 
-function displayTagsSelected() {
   document.addEventListener("click", (e)=> {
     if(e.target.classList.contains("tag")){
-      console.log()
       const tagWrapper = document.querySelector(".tags-selected")
-      const tagText = e.target.textContent      
+      const tagText = e.target.textContent.toLowerCase()      
       const tagsSearch = document.querySelector(".tags-search")
       const colorTag = e.target.parentNode.getAttribute("id")      
       
       tagsSearchArray.push(tagText) 
       tagsSearch.dataset.tags = [tagsSearchArray]
       e.target.style.display = "none"
+      tagWrapper.dataset.addedRemoved= "added"
       tagWrapper.innerHTML+=`<button class="btn-tag" onload="removeBtnTag();" data-selected="true" data-color="${colorTag}">${tagText}<i class="far fa-times-circle"></i></button>`
+      
+      // test pour l'affichage des recttes avec les tags en cours ...
+
+      tagsSelectedDisplay(getRecipesDatas())
+        .then( recipe => { console.log(recipe)
+        if(recipe.length === 0) {
+          console.log("pas de choix")
+          noRecipesFoundDisplay()
+        }         
+        if (recipe.length > 0) {       
+          displayRecipeAfterSelection(tagsSelectedDisplay(getRecipesDatas()))  
+        }
+      })
+    }
+
+    if(e.target.classList.contains("fa-times-circle") || e.target.classList.contains("btn-tag")) {
+      
+      if(tagsSearchDataset.getAttribute("data-tags").length === 0 && search.value === "") {
+        console.log("ici")
+        displayRecipesWithTagsSelected(getRecipesDatas())
+      }
+      if(search.value.length < 3){
+        console.log("ok")
+        displayRecipesWithTagsSelected(getRecipesDatas())
+      }
+      if(search.value !== "") {
+        console.log("search value")
+        let query = search.value
+        console.log(query)
+        let allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query)
+        let filteredDatas = recipesDatas.filter( recipe => allRecipes.includes(recipe.id))
+      
+
+        const main = document.querySelector(".recipes-wrapper")
+        main.innerHTML = "" 
+        displayRecipesWithTagsSelected(filteredDatas)
+        
+      }
     }
   })
 }
 
+/**
+* Effacer les tags de la liste des selectionnés
+*/
 async function removeBtnTag() {
+  const recipesDatas = await getRecipesDatas()
+
   document.addEventListener("click", (e)=> {
     if(e.target.classList.contains("btn-tag")){    
       const tagSelectedText = e.target.textContent.toLowerCase()
@@ -323,18 +517,37 @@ async function removeBtnTag() {
       const tagsSearch = document.querySelector(".tags-search")
       const tagsSearchText = tagsSearch.dataset.tags      
       const index = tagsSearchArray.indexOf(tagSelectedText)
-      
-      console.log(tagsSearchArray)
-      console.log(tagSelectedText)
-      
+      const tagWrapper = document.querySelector(".tags-selected")
+            
       tagsSearchArray = tagsSearchText.toLowerCase().split(",")
       tagsSearchArray.splice(index, 1)
-      tagsSearch.dataset.tags = [tagsSearchArray]      
+      tagsSearch.dataset.tags = [tagsSearchArray] 
+      tagWrapper.dataset.addedRemoved= "removed"     
       
       for (let tag of allTagsListSearch) {
         tag.style.display = "block"
         e.target.remove()
       }
+    }
+
+    if(e.target.classList.contains("fa-times-circle")) {
+      const btnClose = e.target
+      const tagSelectedText = btnClose.parentNode.textContent.toLowerCase()
+      const allTagsListSearch = document.querySelectorAll(".tag")
+      const tagsSearch = document.querySelector(".tags-search")
+      const tagsSearchText = tagsSearch.dataset.tags      
+      const index = tagsSearchArray.indexOf(tagSelectedText)
+      const tagWrapper = document.querySelector(".tags-selected")
+            
+      tagsSearchArray = tagsSearchText.toLowerCase().split(",")
+      tagsSearchArray.splice(index, 1)
+      tagsSearch.dataset.tags = [tagsSearchArray] 
+      tagWrapper.dataset.addedRemoved= "removed"     
+      
+      for (let tag of allTagsListSearch) {
+        tag.style.display = "block"
+        e.target.parentNode.remove()
+      }   
     }
   })
 }
@@ -344,10 +557,10 @@ function initSearch() {
   searchTags(getApplianceOrUstensils("appliance"), "input-appliance", ".list-appliances")
   searchTags(getApplianceOrUstensils("ustensils"), "input-ustensils", ".list-ustensils")
   mainSearch(getRecipesDatas())
-  displayTagsSelected()
-  window.onload = removeBtnTag()
+  window.onload = displayTagsSelected()
+  window.onload = removeBtnTag()  
 }
 
 initSearch()
 
-export { searchTags }
+export { searchTags, displayTagsSelected }
