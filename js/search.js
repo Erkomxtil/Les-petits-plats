@@ -2,7 +2,6 @@ import { getIngredientList, selectListSearchTags, getApplianceOrUstensils, order
 import { getRecipesDatas } from "./datas.js"
 import { displayRecipe } from "./recipeFactory.js"
 
-
 /**
  * Variable global tableau des tags selectionnés pour l'ajout et le retrait des tags
  */
@@ -21,35 +20,11 @@ async function mainSearch(datas) {
     let allRecipes    
     let filteredDatas = []
     
-    if(e.target.value.length >= 3) {
-      let ingredientsArray = [], appliancesArray = [], ustensilsArray = []      
+    if(e.target.value.length >= 3) {      
       allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query)
       filteredDatas = recipesDatas.filter( recipe => allRecipes.includes(recipe.id))
       
-      for (let data of filteredDatas) {
-        for (let ingredient of data.ingredients) {
-          ingredientsArray.push(ingredient.ingredient)
-        }
-      }
-      for (let data of filteredDatas) {
-        appliancesArray.push(data.appliance)
-      }
-
-      for (let data of filteredDatas) {
-        for (let ustensil of data.ustensils) {
-          ustensilsArray.push(ustensil)
-        }
-      }
-
-      /* Mise à jour des tags avec la recherche principale */
-      displayNewListSearchTags(ingredientsArray, ".list-ingredients", "newList")
-      displayNewListSearchTags(appliancesArray, ".list-appliances", "newList")
-      displayNewListSearchTags(ustensilsArray, ".list-ustensils", "newList")
-
-      /* Mise à jour des tags avec la recherche secondaire */
-      searchTags(ingredientsArray, "input-ingredient", ".list-ingredients")
-      searchTags(appliancesArray, "input-appliance", ".list-appliances")
-      searchTags(ustensilsArray, "input-ustensils", ".list-ustensils")
+      updateTagsListWithSearch(filteredDatas)
       
       /* Affichage quand aucune recette ne correspond à la recherche */
       if(filteredDatas.length === 0) {
@@ -59,27 +34,26 @@ async function mainSearch(datas) {
         displayRecipesWithTagsSelected(filteredDatas)
       }
     } else {
+      updateTagsListWithSearch(recipesDatas)
       displayRecipesWithTagsSelected(getRecipesDatas())
     }
   })
 }
 
+/**
+ * Affichage des recettes suite à la recherche principale
+ * @param {*} allDatasFromMainSearch liste des recettes
+ */
 async function displayRecipesWithTagsSelected(allDatasFromMainSearch) {
-  
   const recipeDatas = await allDatasFromMainSearch
   const targetNode = document.querySelector(".tags-selected")
-  const inputSearch = document.getElementById("search")  
   const config = { childList: true }  
-  const addedRemovedTag = document.querySelector(".tags-selected").dataset
   const main = document.querySelector(".recipes-wrapper")
   
   displayRecipeAfterSelection(recipeDatas)
 
   let callback = (mutationList) => {
-    // console.log(mutationList)
-
     if (mutationList[0].type === "childList") {
-      // console.log("ok")
       observer.disconnect()
       main.innerHTML = ""
       displayRecipeAfterSelection(tagsSelectedDisplay(recipeDatas))      
@@ -95,6 +69,11 @@ async function displayRecipesWithTagsSelected(allDatasFromMainSearch) {
   observer.observe(targetNode, config) 
 }
 
+/**
+ * Liste des recettes après avoir choisi des tags
+ * @param {*} allRecipesDatas On récupère toutes les recettes
+ * @returns 
+ */
 async function tagsSelectedDisplay(allRecipesDatas) {
   let recipeDatas
   if (typeof allRecipesDatas?.then === 'function') {
@@ -109,10 +88,7 @@ async function tagsSelectedDisplay(allRecipesDatas) {
   let allAppliancesTag = []
   let allUstensilsTag = []
   const tagsSelectedList = document.querySelectorAll(".btn-tag")
-
-
-
-      
+  
   for (let tag of tagsSelectedList){
     if (tag.dataset.color === "ingredients") {      
       allIngredientsTag.push(tag.textContent.toLowerCase())
@@ -160,7 +136,6 @@ async function tagsSelectedDisplay(allRecipesDatas) {
     recipeFilteredWithTag = recipeDatas
   }
 
-   console.log(recipeFilteredWithTag)
   return recipeFilteredWithTag 
 }
 
@@ -174,10 +149,10 @@ function noRecipesFoundDisplay() {
 }
 
 /**
- * 
+ * Mise à jour de la liste des tags avec la recherhce principale
  * @param {*} listInfos Données concernant la liste des ingrédients, appareils ou ustensiles
- * @param {*} listParagraphe 
- * @param {*} fullList 
+ * @param {*} listParagraphe On choisit la div dans laquelle on veut changer les tags 
+ * @param {*} fullList On choisit quelles liste on veut récupérer
  */
 function displayNewListSearchTags(listInfos, listParagraphe, fullList) { 
   const list = document.querySelector(listParagraphe)
@@ -229,11 +204,13 @@ function displayNewListSearchTags(listInfos, listParagraphe, fullList) {
  */
 async function displayRecipeAfterSelection(recipesDatas){
   let dataDisplay
+
   if (typeof recipesDatas?.then === 'function') {
     dataDisplay = await recipesDatas
   } else {
     dataDisplay = recipesDatas
   }
+
   const main = document.querySelector(".recipes-wrapper")
   main.innerHTML = ""
   displayRecipe(recipesDatas)
@@ -267,13 +244,6 @@ function getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query
       allRecipes.push(description.id)
     }
   })
-
-
-
-  // console.log(titles, "titre")
-  // console.log(ingredients, "ingrédients")
-  // console.log(descriptions, "descriptions")
-
 
   return allRecipes
 }
@@ -358,6 +328,7 @@ async function getDatasFromMainRecipes(recipesDatas, dataType) {
       })
     }
   })
+
   return datas
 }
 
@@ -376,6 +347,7 @@ async function searchTags(datasList, inputTag, listTag) {
     for (const data of datas) {
       tab.push(data.toLowerCase())
     }
+
     return tab
   }
 
@@ -442,7 +414,6 @@ function HideTags(datas, listTag, query) {
  */
 async function displayTagsSelected() {
   const recipesDatas = await getRecipesDatas()
-  const datasFilteredWithTags = await tagsSelectedDisplay(getRecipesDatas()) 
   let titles = await getDatasFromMainRecipes(recipesDatas, "name")
   let ingredients = await getDatasFromMainRecipes(recipesDatas, "ingredients")
   let descriptions = await getDatasFromMainRecipes(recipesDatas, "description")
@@ -455,7 +426,7 @@ async function displayTagsSelected() {
       const tagWrapper = document.querySelector(".tags-selected")
       const tagText = e.target.textContent.toLowerCase()      
       const tagsSearch = document.querySelector(".tags-search")
-      const colorTag = e.target.parentNode.getAttribute("id")      
+      const colorTag = e.target.parentNode.getAttribute("id")    
       
       tagsSearchArray.push(tagText) 
       tagsSearch.dataset.tags = [tagsSearchArray]
@@ -463,53 +434,117 @@ async function displayTagsSelected() {
       tagWrapper.dataset.addedRemoved= "added"
       tagWrapper.innerHTML+=`<button class="btn-tag" onload="removeBtnTag();" data-selected="true" data-color="${colorTag}">${tagText}<i class="far fa-times-circle"></i></button>`
       
-      // test pour l'affichage des recttes avec les tags en cours ...
-
       tagsSelectedDisplay(getRecipesDatas())
-        .then( recipe => { console.log(recipe)
+        .then( recipe => {
         if(recipe.length === 0) {
-          console.log("pas de choix")
           noRecipesFoundDisplay()
-        }         
-        if (recipe.length > 0) {       
+        }
+
+        if (recipe.length > 0 && search.value.length === 0) {       
           displayRecipeAfterSelection(tagsSelectedDisplay(getRecipesDatas()))  
+        }
+
+        if (recipe.length > 0 && search.value.length !== "") {
+          let query = search.value
+          let allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query)
+          let filteredDatas = recipesDatas.filter( recipe => allRecipes.includes(recipe.id))
+
+
+          tagsAndSearchFilteredDisplay(colorTag, filteredDatas, tagsSearchArray)
         }
       })
     }
 
-    if(e.target.classList.contains("fa-times-circle") || e.target.classList.contains("btn-tag")) {
-      
+    if(e.target.classList.contains("fa-times-circle") || e.target.classList.contains("btn-tag")) {      
       if(tagsSearchDataset.getAttribute("data-tags").length === 0 && search.value === "") {
-        console.log("ici")
         displayRecipesWithTagsSelected(getRecipesDatas())
       }
-      if(search.value.length < 3){
-        console.log("ok")
-        displayRecipesWithTagsSelected(getRecipesDatas())
-      }
-      if(search.value !== "") {
-        console.log("search value")
-        let query = search.value
-        console.log(query)
-        let allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query)
-        let filteredDatas = recipesDatas.filter( recipe => allRecipes.includes(recipe.id))
-      
 
-        const main = document.querySelector(".recipes-wrapper")
-        main.innerHTML = "" 
-        displayRecipesWithTagsSelected(filteredDatas)
-        
-      }
+      tagsSelectedDisplay(getRecipesDatas())
+        .then( recipe => {
+          displayRecipesWithTagsSelected(recipe)
+      })
     }
   })
+}
+
+/**
+ * Les recettes sont filtrées avec la recherche, les tags et ensuite on affiche le résultat
+ * @param {*} colorTag 
+ * @param {*} filteredDatas 
+ * @param {*} tagsSearchArray 
+ */
+function tagsAndSearchFilteredDisplay(colorTag, filteredDatas, tagsSearchArray) {
+  let recipeFilteredWithTag = []
+  let tagFilter = false
+
+  if(colorTag === "ingredients") {
+    if(tagFilter) {
+      recipeFilteredWithTag = recipeFilteredWithTag.filter(recipe => recipe.ingredients.some( ingredient => tagsSearchArray.includes(ingredient.ingredient.toLowerCase())))
+    } else {
+      recipeFilteredWithTag = filteredDatas.filter(recipe => recipe.ingredients.some( ingredient => tagsSearchArray.includes(ingredient.ingredient.toLowerCase())))
+      tagFilter = true
+    }
+  }
+  
+  if(colorTag === "appliances") {
+    if(tagFilter) {              
+      recipeFilteredWithTag = recipeFilteredWithTag.filter(recipe => tagsSearchArray.includes(recipe.appliance.toLowerCase()))
+    } else {
+      recipeFilteredWithTag = filteredDatas.filter(recipe => tagsSearchArray.includes(recipe.appliance.toLowerCase()))
+      tagFilter = true
+    }
+  }
+  
+  if(colorTag === "ustensils") {
+    if(tagFilter) {
+      recipeFilteredWithTag = recipeFilteredWithTag.filter(recipe => recipe.ustensils.some( ustensil => tagsSearchArray.includes(ustensil.toLowerCase())))
+    } else {
+      recipeFilteredWithTag = filteredDatas.filter(recipe => recipe.ustensils.some( ustensil => tagsSearchArray.includes(ustensil.toLowerCase())))
+      tagFilter = true
+    }
+  }
+
+  displayRecipesWithTagsSelected(recipeFilteredWithTag)
+}
+
+
+/**
+ * Mise à jour des tags avec les recherches
+ * @param {*} filteredDatas On récupère la liste des recettes filtrées pour afficher les tags qui correspondent
+ */
+function updateTagsListWithSearch(filteredDatas) {
+  let ingredientsArray = [], appliancesArray = [], ustensilsArray = []      
+  for (let data of filteredDatas) {
+    for (let ingredient of data.ingredients) {
+      ingredientsArray.push(ingredient.ingredient)
+    }
+  }
+  for (let data of filteredDatas) {
+    appliancesArray.push(data.appliance)
+  }
+
+  for (let data of filteredDatas) {
+    for (let ustensil of data.ustensils) {
+      ustensilsArray.push(ustensil)
+    }
+  }
+
+  /* Mise à jour des tags avec la recherche principale */
+  displayNewListSearchTags(ingredientsArray, ".list-ingredients", "newList")
+  displayNewListSearchTags(appliancesArray, ".list-appliances", "newList")
+  displayNewListSearchTags(ustensilsArray, ".list-ustensils", "newList")
+
+  /* Mise à jour des tags avec la recherche secondaire */
+  searchTags(ingredientsArray, "input-ingredient", ".list-ingredients")
+  searchTags(appliancesArray, "input-appliance", ".list-appliances")
+  searchTags(ustensilsArray, "input-ustensils", ".list-ustensils")
 }
 
 /**
 * Effacer les tags de la liste des selectionnés
 */
 async function removeBtnTag() {
-  const recipesDatas = await getRecipesDatas()
-
   document.addEventListener("click", (e)=> {
     if(e.target.classList.contains("btn-tag")){    
       const tagSelectedText = e.target.textContent.toLowerCase()

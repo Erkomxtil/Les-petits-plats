@@ -16,6 +16,7 @@
     <header>
       <img src="images/logo.png" alt="Logo les petits plats">
     </header>
+    <!-- Recherche principale -->
     <section class="search">
       <form>
         <label for="search" hidden>Recherche</label>
@@ -23,10 +24,12 @@
         <i class="fa-solid fa-magnifying-glass"></i>
       </form>
     </section>
+    <!-- Affichages des tags selectionnés -->
     <section class="tags-selected"></section>
     <section class="tags">
       <article class="tags-wrapper"></article>
     </section>
+    <!-- Recherche secondaire -->
     <section class="tags-search">
       <div class="ingredients-tags-wrapper">
         <button class="btn-tags ingredients">Ingredients <i class="fa-sharp fa-solid fa-chevron-up"></i></button>
@@ -49,35 +52,9 @@
           <p id="ustensils" class="list-infos list-ustensils"></p>
         </div>
       </div>
-
     </section>
-    <main class="recipes-wrapper">
-      <!-- <article>
-        <img src="images/image-basic-plat.jpg" alt="Image par défault">
-        <div class="info-recipe-wrapper">
-          <div class="info-title-time">
-            <h2>Limonade de Coco</h2>
-            <div class="info-time"><strong><i class="fa-regular fa-clock"></i> 10 min</strong></div>
-          </div>
-          <div class="info-ingredients-recipe">
-            <div class="info-ingredients">
-              <p class="ingredients">
-                <strong>Lait de coco:</strong> 400ml <br>
-                <strong>Jus de citron:</strong> 2 <br>
-                <strong>Créme de coco:</strong> 4 cuillères <br>
-                <strong>Sucre:</strong> 20g <br>
-                <strong>Glaçons:</strong> 2
-              </p>
-            </div>
-            <div class="info-recipe">
-              <p>
-                Mettre les glaçons à votre goût dans le blender, ajouter le lait, la crème de coco, le jus de 2 citrons et le sucre. Mixer jusqu'à avoir la consistence désirée.
-              </p>
-            </div>
-          </div>
-        </div class="info-recipe-wrapper">
-      </article> -->
-    </main>
+    <!-- Affichage des recettes -->
+    <main class="recipes-wrapper"></main>
   </div>
   <script src="https://kit.fontawesome.com/c34e9b6d35.js" crossorigin="anonymous"></script>
   <script src="./js/main.js" type="module"></script>

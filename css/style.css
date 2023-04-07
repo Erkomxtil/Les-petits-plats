@@ -169,6 +169,7 @@ main {
   grid-column-gap: 50px;
   grid-row-gap: 50px;
   margin-top: 170px;
+  margin-bottom: 100px;
 }
 main article {
   background-color: #E7E7E7;
