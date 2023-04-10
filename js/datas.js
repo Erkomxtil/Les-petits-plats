@@ -5,7 +5,7 @@ async function getRecipesDatas() {
 	let reponse 
 
 	if (originUrl === "https://erkomxtil.github.io") {
-		reponse = await fetch(`${originUrl}/les-petits-plats/js/recipes.json`)
+		reponse = await fetch(`${originUrl}/Les-petits-plats/js/recipes.json`)
     const recipes = await reponse.json()
     return recipes
 	} else {
@@ -16,4 +16,3 @@ async function getRecipesDatas() {
 }
 
 export { getRecipesDatas }
-
