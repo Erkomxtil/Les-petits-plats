@@ -1,7 +1,9 @@
 import { displayRecipe } from "./recipeFactory.js";
 import { getRecipesDatas } from "./datas.js";
 import { closeTagsSearch, openTagsSearch } from "./tags.js"
-import { searchTags, displayTagsSelected } from "./search.js"
+import { searchTags } from "./search.js"
+import { mainSearch } from "./mainSearch.js"
+
 
 /**
  * 
@@ -119,6 +121,7 @@ function init() {
   searchTags(getIngredientList())
   openTagsSearch()
   closeTagsSearch()
+  mainSearch(getRecipesDatas())
 }
 
 
