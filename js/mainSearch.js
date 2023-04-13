@@ -6,6 +6,8 @@ async function mainSearch(datas) {
   let titles = await getDatasFromMainRecipes(recipesDatas, "name")
   let ingredients = await getDatasFromMainRecipes(recipesDatas, "ingredients")
   let descriptions = await getDatasFromMainRecipes(recipesDatas, "description")
+  let appliances = await getDatasFromMainRecipes(recipesDatas, "appliance")
+  let ustensils = await getDatasFromMainRecipes(recipesDatas, "ustensils")
   
   search.addEventListener("input", (e) => {
     e.preventDefault()
@@ -14,7 +16,7 @@ async function mainSearch(datas) {
     let filteredDatas = []
     
     if(e.target.value.length >= 3) {      
-      allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, query)
+      allRecipes = getAllRecipesSelectedWithInput(titles, ingredients, descriptions, appliances, ustensils, query)
       filteredDatas = recipesDatas.filter( recipe => allRecipes.includes(recipe.id))
       
       updateTagsListWithSearch(filteredDatas)
