@@ -124,8 +124,6 @@ function init() {
   mainSearch(getRecipesDatas())
 }
 
-
-
 init()
 
 export { getIngredientList, getDescriptionsOrTitle, selectListSearchTags, getApplianceOrUstensils, orderedListWithoutDouble }
